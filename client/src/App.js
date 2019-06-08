@@ -15,7 +15,7 @@ class App extends Component {
     };
   }
 
-  lookup = (name) => {
+  lookupSummoner = (name) => {
     axios.get(`/api/${name}`)
     .then(res => {
       console.log(res.data);
@@ -76,7 +76,7 @@ handleFormSubmit = event => {
   event.preventDefault();
 
   // Alert the user their first and last name, clear `this.state.firstName` and `this.state.lastName`, clearing the inputs
-  this.lookup(this.state.username);
+  this.lookupSummoner(this.state.username);
 };
 
   render() {
