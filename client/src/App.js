@@ -10,7 +10,8 @@ class App extends Component {
     this.state = {
       error: null,
       isLoaded: false,
-      username: ""
+      username: "",
+      message: ""
     };
   }
 
@@ -79,7 +80,7 @@ handleFormSubmit = event => {
 };
 
   render() {
-    const { error, isLoaded, username, level } = this.state;
+    const { error, isLoaded, username, level, message } = this.state;
     if (error) {
       return <div>Error: {error.message}</div>;
     } else if (!isLoaded) {
@@ -102,6 +103,7 @@ handleFormSubmit = event => {
           />
           <button onClick={this.handleFormSubmit}>Submit</button>
         </form>
+        <p>{message}</p>
         </div>
       );
     }
