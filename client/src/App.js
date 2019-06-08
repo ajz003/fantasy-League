@@ -1,20 +1,110 @@
 import React, { Component } from "react";
 import logo from "./logo.svg";
 import "./App.css";
+const axios = require('axios');
 
 class App extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: null,
+      isLoaded: false,
+      username: ""
+    };
+  }
+
+  lookup = (name) => {
+    axios.get(`/api/${name}`)
+    .then(res => {
+      console.log(res.data);
+      let summoner = res.data;
+      this.setState({
+        isLoaded: true,
+        username: summoner.name,
+        level: summoner.summonerLevel
+      });
+    },
+    // Note: it's important to handle errors here
+    // instead of a catch() block so that we don't swallow
+    // exceptions from actual bugs in components.
+    (error) => {
+      this.setState({
+        isLoaded: true,
+        error
+      });
+    }
+  )
+  }
+
+  componentDidMount() {
+    axios.get(`/api`)
+    .then(res => {
+      console.log(res);
+      let summoner = res.data;
+      this.setState({
+        isLoaded: true,
+        username: summoner.name,
+        level: summoner.summonerLevel
+      });
+    },
+    // Note: it's important to handle errors here
+    // instead of a catch() block so that we don't swallow
+    // exceptions from actual bugs in components.
+    (error) => {
+      this.setState({
+        isLoaded: true,
+        error
+      });
+    }
+  )
+}
+
+handleInputChange = event => {
+  // Getting the value and name of the input which triggered the change
+  const { name, value } = event.target;
+
+  // Updating the input's state
+  this.setState({
+    [name]: value
+  });
+};
+
+handleFormSubmit = event => {
+  // Preventing the default behavior of the form submit (which is to refresh the page)
+  event.preventDefault();
+
+  // Alert the user their first and last name, clear `this.state.firstName` and `this.state.lastName`, clearing the inputs
+  this.lookup(this.state.username);
+};
+
   render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
+    const { error, isLoaded, username, level } = this.state;
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    } else if (!isLoaded) {
+      return <div>Loading...</div>;
+    } else {
+      return (
+        <div>
+        {/* <p>Username: {username}</p>
+        <p>Summoner Level: {level}</p> */}
+        <p>
+        Your summoner level is {this.state.level}
         </p>
-      </div>
-    );
+        <form className="form">
+          <input
+            value={this.state.username}
+            name="username"
+            onChange={this.handleInputChange}
+            type="text"
+            placeholder="Username"
+          />
+          <button onClick={this.handleFormSubmit}>Submit</button>
+        </form>
+        </div>
+      );
+    }
   }
 }
 
