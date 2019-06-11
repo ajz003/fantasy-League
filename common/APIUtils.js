@@ -32,6 +32,8 @@ function calculatePlayerScore(stats) {
     playerScore += pentaKills * 10;
     playerScore += tenTakedownsBonus;
 
+    console.log(`KDA: ${kills}/${deaths}/${assists}`);
+
     return playerScore
 }
 

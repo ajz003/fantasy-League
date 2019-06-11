@@ -64,12 +64,79 @@ router.get(`/match/:summonerName`, function (req, res, next) {
                 }
               }
 
-              console.log(playerGameData, "playerGameData")
+              // console.log(playerGameData, "playerGameData")
 
               let stats = playerGameData.stats;
 
+              console.log(stats);
+
               res.send(APIUtils.calculatePlayerScore(stats).toString())
             })
+        })
+    })
+});
+
+router.get(`/match/:summonerName/:numberOfMatches`, function (req, res, next) {
+  let summonerName = req.params.summonerName;
+  let numberOfMatches = req.params.numberOfMatches;
+  let gameIds = [];
+  let participantId;
+  let accountId;
+  let playerGameData;
+  let playerScores = [];
+
+  axios.get(`https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${summonerName}?api_key=${api_key}`)
+    .then(response => {
+      accountId = response.data.accountId;
+      axios.get(`https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/${accountId}?endIndex=${numberOfMatches}&api_key=${api_key}`)
+        .then(response => {
+          for (let i = 0; i < response.data.matches.length; i++) {
+            gameIds.push(response.data.matches[i].gameId);
+          }
+        })
+        .then(function () {
+          for (let i = 0; i < gameIds.length; i++) {
+            axios.get(`https://na1.api.riotgames.com/lol/match/v4/matches/${gameIds[i]}?api_key=${api_key}`)
+              .then(response => {
+                let participants = response.data.participants;
+                let participantsIdentities = response.data.participantIdentities;
+                for (let i = 0; i < participantsIdentities.length; i++) {
+                  if (participantsIdentities[i].player.accountId === accountId) {
+                    participantId = participantsIdentities[i].participantId;
+                    break;
+                  }
+                }
+
+                for (let i = 0; i < participants.length; i++) {
+                  if (participants[i].participantId === participantId) {
+                    playerGameData = participants[i];
+                    break;
+                  }
+                }
+
+                // console.log(playerGameData, "playerGameData")
+
+                let stats = playerGameData.stats;
+
+                // console.log(stats);
+                playerScores.push(APIUtils.calculatePlayerScore(stats));
+
+                console.log(playerScores, "playerScores")
+
+                if (i === gameIds.length - 1) {
+                  console.log(playerScores);
+                  res.send(playerScores);
+                }
+
+              })
+              .then(function() {
+                if (gameIds.length === numberOfMatches.length) {
+                  console.log(playerScores);
+                  res.send(playerScores);
+                }
+              })
+
+          }
         })
     })
 });
